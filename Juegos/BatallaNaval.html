@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mini Batalla Naval</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --cell-bg: #334155;
+            --cell-hover: #475569;
+            --water-color: #64748b;
+            --hit-color: #f43f5e;
+            --win-color: #34d399;
+            --secondary-btn: #334155;
+            --secondary-hover: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            background-color: var(--secondary-btn);
+            color: var(--text-color);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-back:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-back:active {
+            transform: scale(0.96);
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .score-item span {
+            color: var(--accent);
+        }
+
+        .battleship-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background-color: var(--cell-bg);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell:active {
+            transform: scale(0.92);
+        }
+
+        .cell.water {
+            background-color: var(--water-color);
+            cursor: default;
+        }
+
+        .cell.hit {
+            background-color: var(--hit-color);
+            cursor: default;
+            animation: pulse 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        .status-message {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            min-height: 24px;
+            color: var(--accent);
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+       
+        <div class="top-nav">
+            <a href="../index.html" class="btn-back">⬅️ Menú Principal</a>
+        </div>
+
+        <h1>Batalla Naval</h1>
+        <br>
+        <div class="scoreboard">
+            <div class="score-item">Intentos: <span id="attempts">0</span></div>
+            <div class="score-item">Barcos Hundidos: <span id="shipsLeft">3</span> / 3</div>
+        </div>
+
+        <div class="status-message" id="statusMsg">¡Selecciona una casilla para disparar!</div>
+
+       
+        <div class="battleship-grid" id="grid">
+            
+        </div>
+
+        <button class="btn" id="restartBtn">Reiniciar Juego</button>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const attemptsDisplay = document.getElementById('attempts');
+        const shipsLeftDisplay = document.getElementById('shipsLeft');
+        const statusMsg = document.getElementById('statusMsg');
+        const restartBtn = document.getElementById('restartBtn');
+
+        const GRID_SIZE = 5;
+        let attempts = 0;
+        let hits = 0;
+        let totalShipCells = 5;
+        let shipCoordinates = [];
+        let gameOver = false;
+
+        function initGame() {
+            grid.innerHTML = '';
+            attempts = 0;
+            hits = 0;
+            gameOver = false;
+            attemptsDisplay.textContent = attempts;
+            shipsLeftDisplay.textContent = "3";
+            statusMsg.textContent = "¡Selecciona una casilla para disparar!";
+            statusMsg.style.color = "var(--accent)";
+
+            placeShips();
+
+            for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.addEventListener('pointerdown', handleAttack);
+                grid.appendChild(cell);
+            }
+        }
+
+        function placeShips() {
+            shipCoordinates = [];
+            
+            let placed = false;
+            while (!placed) {
+                let isVertical = Math.random() < 0.5;
+                let row = Math.floor(Math.random() * (isVertical ? 3 : 5));
+                let col = Math.floor(Math.random() * (isVertical ? 5 : 3));
+                
+                let tempCoords = [];
+                for (let i = 0; i < 3; i++) {
+                    let r = isVertical ? row + i : row;
+                    let c = isVertical ? col : col + i;
+                    tempCoords.push(r * GRID_SIZE + c);
+                }
+                shipCoordinates.push(tempCoords);
+                placed = true;
+            }
+
+            placed = false;
+            while (!placed) {
+                let isVertical = Math.random() < 0.5;
+                let row = Math.floor(Math.random() * (isVertical ? 4 : 5));
+                let col = Math.floor(Math.random() * (isVertical ? 5 : 4));
+                
+                let tempCoords = [];
+                for (let i = 0; i < 2; i++) {
+                    let r = isVertical ? row + i : row;
+                    let c = isVertical ? col : col + i;
+                    tempCoords.push(r * GRID_SIZE + c);
+                }
+
+                let overlap = tempCoords.some(coord => shipCoordinates[0].includes(coord));
+                if (!overlap) {
+                    shipCoordinates.push(tempCoords);
+                    placed = true;
+                } else {
+                    shipCoordinates.pop();
+                }
+            }
+        }
+
+        function handleAttack(e) {
+            e.preventDefault();
+            if (gameOver) return;
+
+            const cell = this;
+            if (cell.classList.contains('water') || cell.classList.contains('hit')) {
+                return;
+            }
+
+            const index = parseInt(cell.dataset.index);
+            attempts++;
+            attemptsDisplay.textContent = attempts;
+
+            let isHit = false;
+            for (let ship of shipCoordinates) {
+                if (ship.includes(index)) {
+                    isHit = true;
+                    break;
+                }
+            }
+
+            if (isHit) {
+                cell.classList.add('hit');
+                cell.textContent = '💥';
+                hits++;
+
+                checkSunkShips();
+
+                if (hits === totalShipCells) {
+                    gameOver = true;
+                    statusMsg.textContent = `¡Victoria! Hundiste todos los barcos en ${attempts} intentos`;
+                    statusMsg.style.color = "var(--win-color)";
+                    disableAllCells();
+                } else {
+                    statusMsg.textContent = "¡Impacto directo! 🎯";
+                    statusMsg.style.color = "var(--hit-color)";
+                }
+            } else {
+                cell.classList.add('water');
+                cell.textContent = '💧';
+                statusMsg.textContent = "¡Agua! Fallaste 🌊";
+                statusMsg.style.color = "var(--water-color)";
+            }
+        }
+
+        function checkSunkShips() {
+            let sunkCount = 0;
+            shipCoordinates.forEach(ship => {
+                let allHit = ship.every(index => {
+                    const cellElement = grid.children[index];
+                    return cellElement.classList.contains('hit');
+                });
+                if (allHit) sunkCount++;
+            });
+            shipsLeftDisplay.textContent = 3 - sunkCount;
+        }
+
+        function disableAllCells() {
+            Array.from(grid.children).forEach(cell => {
+                cell.removeEventListener('pointerdown', handleAttack);
+            });
+        }
+
+        restartBtn.addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>
