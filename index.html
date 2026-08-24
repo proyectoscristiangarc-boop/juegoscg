@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Minijuegos Web CG</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+            --text-color: #f8fafc;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --desc-color: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 460px;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--desc-color);
+        }
+
+        
+        .games-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: var(--text-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .game-card:hover {
+            border-color: var(--accent);
+            background-color: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        .game-card:active {
+            transform: scale(0.97);
+        }
+
+        .game-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .game-icon {
+            font-size: 2.2rem;
+            background: rgba(15, 23, 42, 0.6);
+            width: 55px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .game-details h2 {
+            font-size: 1.05rem;
+            margin-bottom: 3px;
+        }
+
+        .game-details p {
+            font-size: 0.8rem;
+            color: var(--desc-color);
+            line-height: 1.2;
+        }
+
+        .play-arrow {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            padding-left: 8px;
+        }
+
+        footer {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🎮 Minijuegos Web</h1>
+            <p class="subtitle">Selecciona un juego para comenzar la diversión</p>
+        </header>
+
+        
+        <div class="games-grid">
+            
+           
+            <a href="Juegos/JuegoDeParejas.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128049;</div>
+                    <div class="game-details">
+                        <h2>Juego De Parejas</h2>
+                        <p>Encuentra las 8 parejas ocultas en el menor tiempo e intentos.</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+            
+            <a href="Juegos/AtrapaObjetivo.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128308;</div>
+                    <div class="game-details">
+                        <h2>Atrapa el Objetivo</h2>
+                        <p>¡Toca la pelota roja! Se acelerará automáticamente conforme ganes puntos.</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+            
+            <a href="Juegos/BatallaNaval.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128674;</div>
+                    <div class="game-details">
+                        <h2>Mini Batalla Naval</h2>
+                        <p>Hunde los 3 barcos ocultos (5 casillas en total) en la menor cantidad de intentos..</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+          
+            <a href="Juegos/Ahorcado.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128288;</div>
+                    <div class="game-details">
+                        <h2>El Ahorcado</h2>
+                        <p>Adivina la palabra oculta utilizando la pista.</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+            <a href="Juegos/XyO.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128290;</div>
+                    <div class="game-details">
+                        <h2>X y O</h2>
+                        <p>Juega el tipico juego de O y X, demuestra que puedes ganar.</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+
+            <a href="Juegos/LaCulebrita.html" class="game-card">
+                <div class="game-info">
+                    <div class="game-icon">&#128013;</div>
+                    <div class="game-details">
+                        <h2>Juego de la culebrita</h2>
+                        <p>Juega el clasico juego de la culebrita.</p>
+                    </div>
+                </div>
+                <div class="play-arrow">➔</div>
+            </a>
+
+        </div>
+
+        <footer>
+            &copy; 2026 Tu Portal de Juegos. Todos los derechos reservados.
+        </footer>
+    </div>
+
+</body>
+</html>
