@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Juego de Precisión: Atrapa el Objetivo</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --target-color: #f43f5e;
+            --target-glow: rgba(244, 63, 94, 0.5);
+            --cell-bg: #334155;
+            --secondary-btn: #334155;
+            --secondary-hover: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            background-color: var(--secondary-btn);
+            color: var(--text-color);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-back:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-back:active {
+            transform: scale(0.96);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .time-config {
+            margin-bottom: 16px;
+            text-align: left;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .time-config label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-btn {
+            flex: 1;
+            background-color: var(--cell-bg);
+            color: var(--text-color);
+            border: 2px solid transparent;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-btn.selected {
+            background-color: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .score-item span {
+            display: block;
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .score-item.time span {
+            color: #fbbf24;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .hole {
+            aspect-ratio: 1;
+            background-color: var(--cell-bg);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .target {
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            background: radial-gradient(circle, #fb7185 0%, var(--target-color) 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 0 15px var(--target-glow);
+            transform: scale(0);
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .target.active {
+            display: block;
+            transform: scale(1);
+        }
+
+        .target:active {
+            transform: scale(0.85);
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .game-over-screen {
+            display: none;
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="top-nav">
+            <a href="../index.html" class="btn-back">⬅️ Menú Principal</a>
+        </div>
+
+        <h1>Atrapa el Objetivo</h1>
+        <br>
+        <div class="time-config" id="timeConfigSection">
+            <label>Elige el tiempo de juego:</label>
+            <div class="time-options">
+                <button class="time-btn" data-time="15">15s</button>
+                <button class="time-btn selected" data-time="30">30s</button>
+                <button class="time-btn" data-time="60">60s</button>
+            </div>
+        </div>
+
+        <div class="scoreboard">
+            <div class="score-item">
+                Puntos
+                <span id="score">0</span>
+            </div>
+            <div class="score-item time">
+                Tiempo
+                <span id="timer">30</span>s
+            </div>
+        </div>
+
+        <div class="grid" id="grid">
+            <div class="hole"><div class="target" data-index="0"></div></div>
+            <div class="hole"><div class="target" data-index="1"></div></div>
+            <div class="hole"><div class="target" data-index="2"></div></div>
+            <div class="hole"><div class="target" data-index="3"></div></div>
+            <div class="hole"><div class="target" data-index="4"></div></div>
+            <div class="hole"><div class="target" data-index="5"></div></div>
+            <div class="hole"><div class="target" data-index="6"></div></div>
+            <div class="hole"><div class="target" data-index="7"></div></div>
+            <div class="hole"><div class="target" data-index="8"></div></div>
+        </div>
+
+        <button class="btn" id="startBtn">Iniciar Juego</button>
+        <div class="game-over-screen" id="finalMsg"></div>
+    </div>
+
+    <script>
+        const targets = document.querySelectorAll('.target');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const finalMsg = document.getElementById('finalMsg');
+        const timeConfigSection = document.getElementById('timeConfigSection');
+        const timeButtons = document.querySelectorAll('.time-btn');
+
+        let score = 0;
+        let selectedTime = 30;
+        let timeLeft = 30;
+        let gameInterval = null;
+        let targetTimeout = null;
+        let currentTarget = null;
+        let isPlaying = false;
+        let currentSpeed = 700;
+
+        timeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isPlaying) return;
+                timeButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedTime = parseInt(btn.getAttribute('data-time'));
+                timeLeft = selectedTime;
+                timerDisplay.textContent = timeLeft;
+            });
+        });
+
+        function getRandomTarget() {
+            const index = Math.floor(Math.random() * targets.length);
+            return targets[index];
+        }
+
+        function loopGame() {
+            if (!isPlaying) return;
+            
+            if (currentTarget) {
+                currentTarget.classList.remove('active');
+            }
+
+            currentTarget = getRandomTarget();
+            currentTarget.classList.add('active');
+
+            targetTimeout = setTimeout(loopGame, currentSpeed);
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = selectedTime;
+            currentSpeed = 700;
+            scoreDisplay.textContent = score;
+            timerDisplay.textContent = timeLeft;
+            
+            timeConfigSection.style.display = 'none';
+            startBtn.style.display = 'none';
+            finalMsg.style.display = 'none';
+            isPlaying = true;
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            loopGame();
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(gameInterval);
+            clearTimeout(targetTimeout);
+
+            if (currentTarget) {
+                currentTarget.classList.remove('active');
+            }
+
+            timeConfigSection.style.display = 'block';
+            startBtn.style.display = 'block';
+            startBtn.textContent = 'Jugar de Nuevo';
+            finalMsg.style.display = 'block';
+            finalMsg.innerHTML = `¡Tiempo agotado! Puntuación final: <b>${score}</b> puntos`;
+        }
+
+        targets.forEach(target => {
+            target.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                if (!isPlaying) return;
+                
+                if (target.classList.contains('active')) {
+                    score += 10;
+                    scoreDisplay.textContent = score;
+                    target.classList.remove('active');
+                    currentTarget = null;
+
+                    if (currentSpeed > 250) {
+                        currentSpeed -= 15;
+                    }
+
+                    clearTimeout(targetTimeout);
+                    loopGame();
+                }
+            });
+        });
+
+        startBtn.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
