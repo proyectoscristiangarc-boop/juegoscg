@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>El Ahorcado con Pistas</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --cell-bg: #334155;
+            --win-color: #34d399;
+            --lose-color: #f43f5e;
+            --key-bg: #334155;
+            --key-active: #475569;
+            --secondary-btn: #334155;
+            --secondary-hover: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-bg);
+            padding: 18px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .btn-back {
+            background-color: var(--secondary-btn);
+            color: var(--text-color);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-back:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-back:active {
+            transform: scale(0.96);
+        }
+
+        h1 {
+            font-size: 1.35rem;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .hangman-status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--lose-color);
+        }
+
+        .clue-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed var(--accent);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #bae6fd;
+            margin-bottom: 14px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .word-display {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .letter-slot {
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-bottom: 3px solid var(--accent);
+            min-width: 24px;
+            text-align: center;
+            color: var(--text-color);
+            padding-bottom: 2px;
+        }
+
+        .status-message {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 14px;
+            min-height: 22px;
+            color: #fbbf24;
+        }
+
+        .virtual-keyboard {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 14px;
+        }
+
+        .key-btn {
+            background-color: var(--key-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+        }
+
+        .key-btn:active {
+            transform: scale(0.9);
+            background-color: var(--key-active);
+        }
+
+        .key-btn:disabled {
+            background-color: #1e293b;
+            color: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background-color: var(--accent);
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+            display: none;
+        }
+
+        .btn-reset:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="top-nav">
+            <a href="../index.html" class="btn-back">⬅️ Menú Principal</a>
+        </div>
+
+        <h1>El Ahorcado</h1>
+
+        <div class="hangman-status" id="hangmanStatus">❤️ ❤️ ❤️ ❤️ ❤️ ❤️</div>
+
+        <div class="clue-box" id="clueBox">💡 Cargando palabra...</div>
+
+        <div class="word-display" id="wordDisplay"></div>
+
+        <div class="status-message" id="statusMsg">Selecciona una letra del teclado</div>
+
+        <div class="virtual-keyboard" id="keyboard"></div>
+
+        <button class="btn-reset" id="resetBtn">Siguiente Palabra</button>
+    </div>
+
+    <script>
+        const hugeWordBank = [
+            { word: "PROGRAMACION", clue: "El arte de crear software y código." },
+            { word: "COMPUTADORA", clue: "Dispositivo electrónico para procesar datos." },
+            { word: "JAVASCRIPT", clue: "Lenguaje de programación de la web." },
+            { word: "BICICLETA", clue: "Vehículo de dos ruedas impulsado por pedales." },
+            { word: "MONTAÑA", clue: "Gran elevación natural del terreno." },
+            { word: "ESTRELLA", clue: "Cuerpo celeste que brilla con luz propia." },
+            { word: "UNIVERSO", clue: "El conjunto de todo lo existente en el espacio." },
+            { word: "TELEFONO", clue: "Aparato para hablar a distancia." },
+            { word: "AURICULARES", clue: "Dispositivos para escuchar audio privadamente." },
+            { word: "CHOCOLATE", clue: "Dulce delicioso hecho con cacao." },
+            { word: "ARQUITECTURA", clue: "Arte y técnica de diseñar y construir edificios." },
+            { word: "BIBLIOTECA", clue: "Lugar lleno de libros para leer y estudiar." },
+            { word: "HELICOPTERO", clue: "Aeronave sustentada por rotores horizontales." },
+            { word: "GALAXIA", clue: "Conjunto masivo de estrellas, gas y polvo." },
+            { word: "LABERINTO", clue: "Lugar formado por calles intrincadas donde es difícil salir." },
+            { word: "MICROSCOPIO", clue: "Instrumento para ver objetos muy pequeños." },
+            { word: "Telescopio", clue: "Instrumento óptico para observar objetos lejanos." },
+            { word: "DINOSAURIO", clue: "Reptil prehistórico extinto hace millones de años." },
+            { word: "VOLCAN", clue: "Abertura en la tierra por donde sale lava." },
+            { word: "MURCIELAGO", clue: "Mamífero volador nocturno que usa ecolocalización." },
+            { word: "ZANAHORIA", clue: "Hortaliza subterránea de color anaranjado." },
+            { word: "RELAMPAGO", clue: "Resplandor vivo en las nubes producido por una descarga." },
+            { word: "ACANTILADO", clue: "Gran pendiente o corte vertical en la costa." },
+            { word: "CASCAJO", clue: "Conjunto de pedazos de piedra o ladrillo." },
+            { word: "SUBMARINO", clue: "Embarcación capaz de navegar bajo el agua." },
+            { word: "ASTRONAUTA", clue: "Persona que viaja al espacio exterior." },
+            { word: "MEDUSA", clue: "Animal marino gelatinoso con tentáculos urticantes." },
+            { word: "CAMALEON", clue: "Reptil conocido por cambiar de color." },
+            { word: "ORQUIDEA", clue: "Flor exótica de formas y colores muy variados." },
+            { word: "PIANO", clue: "Instrumento musical de teclado y cuerdas percutidas." }
+        ];
+
+        const MAX_ERRORS = 6;
+        let currentItem = {};
+        let guessedLetters = [];
+        let errors = 0;
+        let gameOver = false;
+
+        const hangmanStatusEl = document.getElementById('hangmanStatus');
+        const clueBoxEl = document.getElementById('clueBox');
+        const wordDisplayEl = document.getElementById('wordDisplay');
+        const statusMsg = document.getElementById('statusMsg');
+        const keyboardEl = document.getElementById('keyboard');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split('');
+
+        function cleanWord(str) {
+            return str.normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .toUpperCase()
+                      .replace(/[^A-ZÑ]/g, "");
+        }
+
+        async function loadNewWord() {
+            gameOver = false;
+            guessedLetters = [];
+            errors = 0;
+            
+            clueBoxEl.textContent = "💡 Buscando palabra...";
+            statusMsg.textContent = "Cargando...";
+            wordDisplayEl.innerHTML = "";
+            keyboardEl.style.display = 'none';
+            resetBtn.style.display = 'none';
+
+            try {
+                
+                const response = await fetch('https://clientes.api.greenborn.com.ar/public-random-word?c=1');
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    let rawWord = cleanWord(data[0]);
+                    
+                   
+                    if (rawWord.length < 4 || rawWord.length > 12) {
+                        throw new Error("Palabra fuera de rango, usando respaldo");
+                    }
+
+                    currentItem = {
+                        word: rawWord,
+                        clue: `Palabra aleatoria en español de ${rawWord.length} letras.`
+                    };
+                } else {
+                    throw new Error("API sin datos");
+                }
+            } catch (error) {
+                const randomIndex = Math.floor(Math.random() * hugeWordBank.length);
+                currentItem = hugeWordBank[randomIndex];
+            }
+
+            updateHangmanVisual();
+            clueBoxEl.textContent = `💡 Pista: ${currentItem.clue}`;
+            renderWord();
+            renderKeyboard();
+
+            statusMsg.textContent = "Selecciona una letra del teclado";
+            statusMsg.style.color = "#fbbf24";
+            keyboardEl.style.display = 'grid';
+        }
+
+        function renderWord() {
+            wordDisplayEl.innerHTML = "";
+            let solved = true;
+
+            for (let letter of currentItem.word) {
+                const span = document.createElement('span');
+                span.classList.add('letter-slot');
+                if (guessedLetters.includes(letter)) {
+                    span.textContent = letter;
+                } else {
+                    span.textContent = "_";
+                    solved = false;
+                }
+                wordDisplayEl.appendChild(span);
+            }
+
+            if (solved && !gameOver) {
+                gameOver = true;
+                statusMsg.textContent = "¡Felicidades! Has ganado 🎉";
+                statusMsg.style.color = "var(--win-color)";
+                endGame();
+            }
+        }
+
+        function renderKeyboard() {
+            keyboardEl.innerHTML = "";
+            alphabet.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.classList.add('key-btn');
+                btn.textContent = letter;
+                
+                if (guessedLetters.includes(letter)) {
+                    btn.disabled = true;
+                }
+
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleGuess(letter, btn);
+                });
+
+                keyboardEl.appendChild(btn);
+            });
+        }
+
+        function handleGuess(letter, btn) {
+            if (gameOver) return;
+
+            guessedLetters.push(letter);
+            btn.disabled = true;
+
+            if (currentItem.word.includes(letter)) {
+                renderWord();
+            } else {
+                errors++;
+                updateHangmanVisual();
+
+                if (errors >= MAX_ERRORS) {
+                    gameOver = true;
+                    statusMsg.textContent = `¡Perdiste! La palabra era: ${currentItem.word} 😢`;
+                    statusMsg.style.color = "var(--lose-color)";
+                    revealWord();
+                    endGame();
+                }
+            }
+        }
+
+        function updateHangmanVisual() {
+            let hearts = "❤️ ".repeat(MAX_ERRORS - errors);
+            let crosses = "❌ ".repeat(errors);
+            hangmanStatusEl.textContent = hearts + crosses;
+        }
+
+        function revealWord() {
+            wordDisplayEl.innerHTML = "";
+            for (let letter of currentItem.word) {
+                const span = document.createElement('span');
+                span.classList.add('letter-slot');
+                span.textContent = letter;
+                if (!guessedLetters.includes(letter)) {
+                    span.style.color = "var(--lose-color)";
+                }
+                wordDisplayEl.appendChild(span);
+            }
+        }
+
+        function endGame() {
+            keyboardEl.style.display = 'none';
+            resetBtn.style.display = 'block';
+        }
+
+        resetBtn.addEventListener('click', loadNewWord);
+
+        // Iniciar juego
+        loadNewWord();
+    </script>
+</body>
+</html>
